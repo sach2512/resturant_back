@@ -1,7 +1,8 @@
 const express = require("express");
 const mongodb = require("mongodb");
 const MongoClient = mongodb.MongoClient;
-const MongoUrl = 'mongodb+srv://sachinjain:Sachin11567@cluster0.xmsrgbk.mongodb.net/?retryWrites=true&w=majority';
+require('dotenv').config();
+const MongoUrl =process.env.MONGOURL||7000;
 const cors = require("cors");
 const bodyParser = require("body-parser");
 
@@ -13,7 +14,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
 
-let db;
+
+
 MongoClient.connect(MongoUrl, (err, client) => {
     if (err) {
         console.error("Error connecting to MongoDB:", err);
@@ -24,10 +26,23 @@ MongoClient.connect(MongoUrl, (err, client) => {
     }
 });
 
+
 app.get('/', (req, res) => {
     res.send('Health OK');
 });
 
+// get list of cities
+
+app.get('/location',(req,res)=>{
+    db.collection("locations").find().toArray((err,data)=>{
+        if (err) {
+            console.error('Error querying MongoDB:', err);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        res.send(data);
+    })
+})
 
 
 app.listen(port, (err) => {
