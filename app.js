@@ -5,7 +5,7 @@ require('dotenv').config();
 const MongoUrl =process.env.MONGOURL||7000;
 const cors = require("cors");
 const bodyParser = require("body-parser");
-
+const resturantrouter= require('./routes/resturant.route.js')
 const AuthKey = "1920d7372573818137d7c1d1b3b0c49f";
 const port = 7000;
 const app = express();
@@ -21,7 +21,7 @@ MongoClient.connect(MongoUrl, (err, client) => {
         console.error("Error connecting to MongoDB:", err);
         throw err;
     } else {
-        db = client.db('restaurant');
+        db = client.db('resturant');
         console.log("Server is connected to MongoDB");
     }
 });
@@ -31,7 +31,13 @@ app.get('/', (req, res) => {
     res.send('Health OK');
 });
 
-// get list of cities
+
+
+
+app.use('/resturant',resturantrouter);
+
+
+// get list of locations
 
 app.get('/location',(req,res)=>{
     db.collection("locations").find().toArray((err,data)=>{
@@ -43,6 +49,22 @@ app.get('/location',(req,res)=>{
         res.send(data);
     })
 })
+
+//list of all meals
+
+
+app.get('/allmeals',(req,res)=>{
+    db.collection("mealtypes").find().toArray((err,data)=>{
+        if (err) {
+            console.error('Error querying MongoDB:', err);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        res.send(data);
+    })
+})
+
+
 
 
 app.listen(port, (err) => {
