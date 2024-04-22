@@ -6,13 +6,15 @@ const MongoUrl =process.env.MONGOURL||7000;
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const resturantrouter= require('./routes/resturant.route.js')
+const userrouter=require('./routes/user.router.js')
 const AuthKey = "1920d7372573818137d7c1d1b3b0c49f";
 const port = 7000;
 const app = express();
-
+const { ObjectId } = require('mongodb');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors());
+//const controller=require('/controller/function.js')
 
 
 
@@ -25,6 +27,18 @@ MongoClient.connect(MongoUrl, (err, client) => {
         console.log("Server is connected to MongoDB");
     }
 });
+// function controller(collectionname,query){
+//     db.collection(collectionname).find(query).toArray((err,data)=>{
+//         if (err) {
+//             console.error('Error querying MongoDB:', err);
+//             res.status(500).send('Internal Server Error');
+//             return;
+//         }else{
+//             res.send(data);
+//         }
+        
+//     })
+// }
 
 
 app.get('/', (req, res) => {
@@ -36,7 +50,7 @@ app.get('/', (req, res) => {
 
 app.use('/resturant',resturantrouter);
 
-
+app.use('/user',userrouter);
 // get list of locations
 
 app.get('/location',(req,res)=>{
@@ -50,6 +64,8 @@ app.get('/location',(req,res)=>{
     })
 })
 
+
+
 //list of all meals
 
 
@@ -59,9 +75,12 @@ app.get('/allmeals',(req,res)=>{
             console.error('Error querying MongoDB:', err);
             res.status(500).send('Internal Server Error');
             return;
+        }else{
+            res.send(data);
         }
-        res.send(data);
+        
     })
+    
 })
 
 

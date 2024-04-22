@@ -1,5 +1,8 @@
 const express= require("express");
 const router= express.Router();
+const mongodb = require("mongodb");
+const MongoClient = mongodb.MongoClient;
+const { ObjectId } = require('mongodb');
 
 //list of all resturants
 
@@ -91,19 +94,18 @@ router.get('/state/meal',(req,res)=>{
 })
 
 //filter  data
-// selectinng all restrunat with meal type and cusine type and cost (ex: breakfas/chinese/300-600)
+// selectinng all restrunat with meal type and cusine type 
 router.get('/:mealtype/:cuisinetype',(req,res)=>{
     let query={};
     let mealtype= req.params.mealtype
     let cuisinetype=req.params.cuisinetype
-    let gt= Number(req.query.gt)
-    let lt= Number(req.query.lt)
-    if(mealtype&&cuisinetype&&gt<lt){
+   
+    if(mealtype&&cuisinetype){
        
         query = {
             "mealTypes.mealtype_name": mealtype,
             "cuisines.cuisine_name": cuisinetype,
-            $and:[{"cost":{$gt:gt}},{"cost":{$lt:lt}}]
+           
         };
     }else{
         query={}
@@ -120,7 +122,83 @@ router.get('/:mealtype/:cuisinetype',(req,res)=>{
     })
 })
 
-//
+//filtering resturant based on cost
 
+router.get('/cost/:gt/:lt',(req,res)=>{
+    let gt= req.params.gt
+    let lt= req.params.lt
+    console.log(gt)
+    console.log(lt)
+    let sort={cost:1}
+    
+    if(!isNaN(gt)&&!isNaN(lt)&&gt<lt){
+        query={$and:[{cost:{$gt:parseInt(gt)}},{cost:{$lt:parseInt(lt)}}]}
+        console.log(query)
+        db.collection("resturantData").find(query).toArray((err,data)=>{
+            if(err){
+                console.log(err);
+                res.status("404").send("failed to fetch data")
+            }else{
+                res.send(data);
+            }
+        })
+    }
+    if(req.query.sort){
+        sort={cost:req.query.sort}
+        db.collection("resturantData").sort().toArray((err,data)=>{
+            if(err){
+                console.log(err);
+                res.status("404").send("failed to fetch data")
+            }else{
+                res.send(data);
+            }
+        })
+        
+    }
+   
+    
+    
+})
+//details of selected restuant
+
+router.get('/:id', async(req,res)=>{
+    let _id=ObjectId(req.params.id);
+    let query={}
+    if(_id){
+        query={_id:_id}
+    }
+    db.collection("resturantData").find(query).toArray((err,data)=>{
+        if(err){
+            console.log(err);
+            res.status("404").send("failed to fetch data")
+        }else{
+            res.send(data);
+            console.log(data)
+        }
+    })
+    
+})
+
+//menu for that particular resturant
+
+router.get('/:resturant_id/menu', async(req,res)=>{
+    let id=req.params.resturant_id
+    let query={}
+    if(id){
+        query={ 
+            restaurant_id:id}
+            
+    }
+    db.collection("menu").find(query).toArray((err,data)=>{
+        if(err){
+            console.log(err);
+            res.status("404").send("failed to fetch data")
+        }else{
+            res.send(data);
+            console.log(data)
+        }
+    })
+    
+})
 
 module.exports=router;
