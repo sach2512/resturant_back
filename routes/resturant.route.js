@@ -22,7 +22,7 @@ router.get('/',(req,res)=>{
 //resturant based on if only state_id 
 router.get('/state',(req,res)=>{
     let state_id=Number(req.query.state_id)
-    let mealtype_name= req.query.mealtype_name
+   
     let query={}
 
     if(state_id){
